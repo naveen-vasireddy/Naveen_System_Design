@@ -1,0 +1,19 @@
+{
+  "name": "naveen-system-design",
+  "version": "1.0.0",
+  "description": "System Design Simulations",
+  "main": "shared/latency_sim.ts",
+  "scripts": {
+    "start": "npx ts-node shared/latency_sim.ts",
+    "build": "tsc",
+    "run": "node dist/shared/latency_sim.js"
+  },
+  "keywords": ["system-design", "latency", "simulation"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "@types/node": "^20.10.6"
+  }
+}
