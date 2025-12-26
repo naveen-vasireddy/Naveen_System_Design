@@ -1,5 +1,5 @@
 // Core implementation for Day 5
-async function simulateRequest(): Promise<number> {
+export async function simulateRequest(): Promise<number> {
     const isSpike = Math.random() < 0.05; // 5% chance of a spike
     const baseLatency = Math.floor(Math.random() * 40) + 10; // 10-50ms
     const spikeLatency = Math.floor(Math.random() * 300) + 200; // 200-500ms
@@ -42,4 +42,4 @@ async function runBenchmark(iterations: number = 10000) {
 }
 
 // Run the benchmark
-runBenchmark(10000).catch(err => console.error('Error running benchmark:', err));
+// runBenchmark(10000).catch(err => console.error('Error running benchmark:', err));
