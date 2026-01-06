@@ -1,22 +1,15 @@
-/**
- * Represents a backend server in the simulation.
- * The activeConnections field is critical for the 
- * Least-Connections algorithm required for Day 13.
- */
 export interface Server {
   id: string;
-  url: string;
-  activeConnections: number; // Tracks current load
+  activeConnections: number; 
+  queue: string[];           // Backpressure queue
+  maxQueueSize: number;      // Maximum capacity before dropping
+  processingTimeMs: number;  // Latency to simulate "uneven loads"
 }
 
-/**
- * Initial configuration for the 5-server cluster 
- * specified in the Day 13 requirements.
- */
-export const MOCK_SERVERS: Server[] = [
-  { id: 'srv-1', url: 'http://server-1.internal', activeConnections: 0 },
-  { id: 'srv-2', url: 'http://server-2.internal', activeConnections: 0 },
-  { id: 'srv-3', url: 'http://server-3.internal', activeConnections: 0 },
-  { id: 'srv-4', url: 'http://server-4.internal', activeConnections: 0 },
-  { id: 'srv-5', url: 'http://server-5.internal', activeConnections: 0 },
+export const MOCK_SERVERS_DAY_14: Server[] = [
+  { id: 'srv-1', activeConnections: 0, queue: [], maxQueueSize: 20, processingTimeMs: 10 },  // Fast
+  { id: 'srv-2', activeConnections: 0, queue: [], maxQueueSize: 20, processingTimeMs: 10 },  // Fast
+  { id: 'srv-3', activeConnections: 0, queue: [], maxQueueSize: 20, processingTimeMs: 10 },  // Fast
+  { id: 'srv-4', activeConnections: 0, queue: [], maxQueueSize: 20, processingTimeMs: 100 }, // Slow
+  { id: 'srv-5', activeConnections: 0, queue: [], maxQueueSize: 20, processingTimeMs: 500 }, // Struggling
 ];
