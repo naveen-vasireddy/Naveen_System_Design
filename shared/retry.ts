@@ -1,4 +1,4 @@
-interface RetryConfig {
+export interface RetryConfig {
   maxRetries: number;
   baseDelay: number; // in ms
   timeoutMs: number; // in ms
