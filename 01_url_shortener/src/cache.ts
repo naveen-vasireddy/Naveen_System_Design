@@ -1,9 +1,9 @@
 // 01-url-shortener/src/cache.ts
 import Redis from 'ioredis';
-
+import RedisMock from 'ioredis-mock';
 // Standard Redis connection (using default local port)
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-
+// export const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+export const redis = new RedisMock();
 export const urlCache = {
   /**
    * Retrieves a long URL from the cache using its short code.
