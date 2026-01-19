@@ -25,5 +25,10 @@ export const urlCache = {
   async exists(code: string): Promise<boolean> {
     const exists = await redis.exists(`url:${code}`);
     return exists === 1;
+  },
+
+  async getTtl(code: string): Promise<number> {
+    // Returns remaining seconds. -1 if no expiry, -2 if key doesn't exist.
+    return await redis.ttl(`url:${code}`);
   }
 };
