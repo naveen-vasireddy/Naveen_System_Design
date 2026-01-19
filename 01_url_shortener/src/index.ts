@@ -1,19 +1,21 @@
 import express from 'express';
 import { generateBase62Code } from './codegen';
 import { urlCache } from './cache';
-import { rateLimit, validateRequest } from './middleware'; // Import the new middleware
+import cors from 'cors';
+import { rateLimit, validateRequest, counters } from './middleware'; // Import counters
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-// --- Write Endpoint (Protected) ---
-// Order of middleware matters:
-// 1. rateLimit: Stop spam bots immediately (saves CPU).
-// 2. validateRequest: Ensure URL is valid and not on the blocklist.
+// 1. POST /shorten with Custom TTL
 app.post('/shorten', rateLimit, validateRequest, async (req, res) => {
-  const { url } = req.body;
+  const { url, ttl } = req.body; // Accept optional TTL
+
+  // Enforce a max TTL (e.g., 7 days) to prevent abuse
+  const effectiveTtl = ttl && typeof ttl === 'number' && ttl < 604800 ? ttl : 86400;
 
   // Logic from Day 23 (Codegen + Collision Handling)
   const MAX_RETRIES = 3;
@@ -26,31 +28,67 @@ app.post('/shorten', rateLimit, validateRequest, async (req, res) => {
   }
 
   if (await urlCache.exists(code)) {
-    return res.status(500).json({ 
-      error: "Could not generate a unique short link. Please try again." 
-    });
+    return res.status(500).json({ error: "Collision detected" });
   }
 
-  await urlCache.set(code, url);
+  // Pass the effective TTL
+  await urlCache.set(code, url, effectiveTtl);
   
+  // Increment success metric
+  counters.total_requests++;
+
   return res.status(201).json({
     shortUrl: `http://localhost:${PORT}/${code}`,
-    code: code
+    code: code,
+    ttl: effectiveTtl
   });
 });
 
-// --- Read Endpoint (Public/Fast) ---
-// We generally do NOT rate limit the redirect path as aggressively, 
-// or we use a much higher limit (e.g., 1000/min), as this is the "Hot Path".
-app.get('/:code', async (req, res) => {
+// 2. GET /stats/:code (New Endpoint)
+app.get('/stats/:code', async (req, res) => {
   const { code } = req.params;
-
   const longUrl = await urlCache.get(code);
 
   if (!longUrl) {
     return res.status(404).json({ error: "URL not found" });
   }
 
+  const ttl = await urlCache.getTtl(code);
+
+  return res.json({
+    code,
+    originalUrl: longUrl,
+    ttlSeconds: ttl,
+    expiresAt: new Date(Date.now() + ttl * 1000).toISOString()
+  });
+});
+
+// 3. GET /metrics (Prometheus Format)
+app.get('/metrics', (req, res) => {
+  const metrics = [
+    `# HELP url_shortener_requests_total Total number of successful shorten requests`,
+    `# TYPE url_shortener_requests_total counter`,
+    `url_shortener_requests_total ${counters.total_requests || 0}`,
+    
+    `# HELP url_shortener_blocked_total Total requests blocked by validation`,
+    `# TYPE url_shortener_blocked_total counter`,
+    `url_shortener_blocked_total ${counters.abuse_validation_blocked_count}`,
+    
+    `# HELP url_shortener_rate_limited_total Total requests rejected by rate limit`,
+    `# TYPE url_shortener_rate_limited_total counter`,
+    `url_shortener_rate_limited_total ${counters.rate_limit_exceeded_count}`
+  ];
+
+  res.set('Content-Type', 'text/plain');
+  res.send(metrics.join('\n'));
+});
+
+// GET /:code (Redirect)
+app.get('/:code', async (req, res) => {
+  const { code } = req.params;
+  const longUrl = await urlCache.get(code);
+
+  if (!longUrl) return res.status(404).json({ error: "URL not found" });
   return res.redirect(301, longUrl);
 });
 

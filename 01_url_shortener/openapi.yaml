@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: URL Shortener API
+  version: 1.0.0
+  description: A high-performance URL shortener with rate limiting and metrics.
+servers:
+  - url: http://localhost:3000
+paths:
+  /shorten:
+    post:
+      summary: Create a short URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  example: "https://www.google.com"
+                ttl:
+                  type: integer
+                  description: Time to live in seconds (default 86400)
+                  example: 3600
+      responses:
+        '201':
+          description: Short link created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shortUrl:
+                    type: string
+                  code:
+                    type: string
+                  ttl:
+                    type: integer
+        '400':
+          description: Invalid URL or Blocked Domain
+        '429':
+          description: Rate limit exceeded
+  
+  /{code}:
+    get:
+      summary: Redirect to original URL
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '301':
+          description: Redirects to long URL
+        '404':
+          description: URL not found
+
+  /stats/{code}:
+    get:
+      summary: Get URL metadata
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Metadata found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  originalUrl:
+                    type: string
+                  ttlSeconds:
+                    type: integer
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      responses:
+        '200':
+          description: Text-based metrics
+          content:
+            text/plain:
+              schema:
+                type: string

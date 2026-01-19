@@ -7,9 +7,10 @@ const RATE_LIMIT_WINDOW = 60; // 60 seconds
 const RATE_LIMIT_MAX = 10;    // 10 requests per window per IP
 
 // --- Observability Counters (Placeholders for Day 42) ---
-const counters = {
+export const counters = {
   abuse_validation_blocked_count: 0,
-  rate_limit_exceeded_count: 0
+  rate_limit_exceeded_count: 0,
+  total_requests: 0
 };
 
 /**
