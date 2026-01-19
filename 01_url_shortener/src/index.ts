@@ -11,7 +11,7 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // 1. POST /shorten with Custom TTL
-app.post('/shorten', rateLimit, validateRequest, async (req, res) => {
+app.post('/shorten', /* rateLimit, */ validateRequest, async (req, res) => {
   const { url, ttl } = req.body; // Accept optional TTL
 
   // Enforce a max TTL (e.g., 7 days) to prevent abuse
