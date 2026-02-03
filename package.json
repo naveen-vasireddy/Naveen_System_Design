@@ -28,6 +28,7 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
+    "@types/uuid": "^11.0.0",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "ioredis": "^5.8.2"
