@@ -14,6 +14,6 @@
     "declarationMap": true,
     "sourceMap": true
   },
-  "include": ["**/*.ts", "01_url_shortener/tests/load_test.js"],
+  "include": ["**/*.ts", "01_url_shortener/tests/load_test.js", "02-rate-limiter/bencmarks/script.js"],
   "exclude": ["node_modules", "dist"]
 }

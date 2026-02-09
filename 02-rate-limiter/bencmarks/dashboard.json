@@ -1,0 +1,34 @@
+{
+  "title": "Rate Limiter Service Metrics",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "Requests Per Second (RPS)",
+      "targets": [
+        { "expr": "rate(http_requests_total[1m])", "legendFormat": "Total RPS" }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Latency (p95)",
+      "targets": [
+        { "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[1m]))", "legendFormat": "p95 Latency" }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Allowed vs Blocked",
+      "targets": [
+        { "expr": "sum(rate(rate_limit_decisions_total{decision='allowed'}[1m]))", "legendFormat": "Allowed" },
+        { "expr": "sum(rate(rate_limit_decisions_total{decision='blocked'}[1m]))", "legendFormat": "Blocked" }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Redis Health",
+      "targets": [
+        { "expr": "redis_up", "legendFormat": "Status" }
+      ]
+    }
+  ]
+}
