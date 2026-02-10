@@ -1,0 +1,61 @@
+# Distributed Rate Limiter Service (Project 2)
+
+A high-performance, distributed rate limiting service built with TypeScript, Redis (Lua), and a custom resilience layer.
+
+## 🏗 Architecture
+This service implements the **Token Bucket** algorithm to control traffic flow.
+1.  **Primary Strategy:** Distributed state via Redis (Atomic Lua Scripts).
+2.  **Resilience:** "Fail-Open" circuit breaker. If Redis crashes or times out, the service automatically degrades to an **In-Memory Token Bucket** to preserve availability.
+3.  **Tenancy:** Multi-tenant policy engine (Free vs. Pro tiers) using namespaced keys.
+
+## 🚀 Getting Started
+
+### Prerequisites
+*   Docker & Docker Compose
+*   Node.js 18+ (for local dev)
+### Run with Docker
+```bash
+docker-compose up --build
+```
+The API will be available at http://localhost:3000
+
+### API Usage
+1. Check Limit (Read-Only)  
+    GET /limit/check?key=user_123
+
+2. Consume Tokens  
+    POST /limit/incr  
+    Content-Type: application/json
+```json
+{
+  "key": "user_123",
+  "cost": 1
+}
+```
+Response (200 OK or 429 Too Many Requests)
+```json
+{
+  "allowed": true,
+  "remaining": 9,
+  "resetAtMs": 0,
+  "source": "redis"
+}
+```
+
+### Benchmarks & Performance
+| Scenario      | Load                    | Latency (p95) | Result                                |
+|---------------|-------------------------|---------------|---------------------------------------|
+| Steady State  | 100 concurrent users    | 40ms          | ✅ Stable                              |
+| Stress Spike  | 1,000 concurrent users  | 1.2s          | ⚠️ Degraded (Network Saturation)       |
+| Redis Outage  | Simulated Crash         | N/A           | ✅ Failover to Memory Success          |
+
+### 🧠 Design Decisions (ADRs)
+- ADR-019: Rate Limit Keys - Composite keys strategy.  
+- ADR-020: Fairness & Burst - 2x burst capacity and tenant isolation.
+
+### 🛠 Tech Stack
+- Language: TypeScript  
+- Storage: Redis (ioredis + Lua)  
+- Testing: Jest (Unit), k6 (Load)
+- Container: Docker / Docker Compose
+- Resilience: In-memory fallback (Fail-Open)

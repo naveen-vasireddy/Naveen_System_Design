@@ -1,0 +1,28 @@
+
+services:
+  # The Rate Limiter Service
+  rate-limiter:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PORT=3000
+    depends_on:
+      - redis
+    networks:
+      - rate-limit-net
+
+  # The Backing Store
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    networks:
+      - rate-limit-net
+
+networks:
+  rate-limit-net:
+    driver: bridge

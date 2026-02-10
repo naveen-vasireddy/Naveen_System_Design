@@ -3,15 +3,17 @@ import type { RateLimiter } from './limiters/index';
 
 // LUA SCRIPT: Atomically refills and consumes tokens
 // Returns: [allowed (1/0), remainingTokens, resetAtMs]
+// LUA SCRIPT: Atomically refills and consumes tokens
 const TOKEN_BUCKET_SCRIPT = `
   local key = KEYS[1]
   local capacity = tonumber(ARGV[1])
-  local refillRate = tonumber(ARGV[2]) -- tokens per second
+  local refillRate = tonumber(ARGV[2])
   local cost = tonumber(ARGV[3])
-  local now = tonumber(ARGV[4]) -- passed from client to ensure sync
+  local now = tonumber(ARGV[4])
 
   -- 1. Get current state
   local state = redis.call("HMGET", key, "tokens", "lastRefill")
+  -- BUG FIX HERE: Access array indices [1] and [2]
   local tokens = tonumber(state[1])
   local lastRefill = tonumber(state[2])
 
@@ -36,7 +38,6 @@ const TOKEN_BUCKET_SCRIPT = `
   if tokens >= cost then
     tokens = tokens - cost
     allowed = 1
-    -- Save state (expire in 1 hour to clean up unused keys)
     redis.call("HMSET", key, "tokens", tokens, "lastRefill", lastRefill)
     redis.call("EXPIRE", key, 3600)
   else
