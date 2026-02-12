@@ -1,0 +1,23 @@
+{
+  "name": "03-cache",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "typescript": "^5.9.3"
+  },
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "dependencies": {
+    "undici-types": "^7.16.0"
+  },
+  "description": ""
+}
