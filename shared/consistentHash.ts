@@ -15,7 +15,11 @@ export class ConsistentHash {
    * Generates a numeric hash for a string key.
    */
   private hash(key: string): number {
-    return crypto.createHash('md5').update(key).digest().readUInt32BE(0);
+    // 1. Create an MD5 hash of the key (standard for consistent hashing)
+    const hashStr = crypto.createHash('md5').update(key).digest('hex');
+    // 2. Take the first 8 characters (32 bits) and parse them as an integer
+    // We use base 16 (hex) to parse.
+    return parseInt(hashStr.substring(0, 8), 16);
   }
 
   /**
