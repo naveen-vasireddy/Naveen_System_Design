@@ -1,0 +1,16 @@
+# ADR-023: Failure Handling and Client Resilience
+
+**Status:** Accepted
+**Date:** Day 40
+
+## Context
+In our distributed cache, nodes will fail. We need to decide how clients handle these failures to avoid cascading outages.
+
+## Decision
+1.  **Fail-over Strategy:** If the primary node for a key is unreachable (timeout/error), the client will immediately try the **next node in the replication ring**.
+2.  **Timeouts:** All TCP connections will have a strict **200ms timeout**.
+3.  **Node Removal:** The `HealthMonitor` (server-side or smart-client side) will remove nodes after 3 consecutive failures to prevent routing traffic to a black hole.
+
+## Consequences
+*   **Pros:** System remains available even if 1/3 nodes are down.
+*   **Cons:** During the detection window (before removal), some requests will experience latency (timeout + retry).
