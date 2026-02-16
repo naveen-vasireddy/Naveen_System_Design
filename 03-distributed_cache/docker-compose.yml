@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  node_a:
+    image: node:18-alpine
+    working_dir: /app/03-distributed_cache
+    volumes:
+      - ../:/app
+    command: npx ts-node src/server.ts
+    environment:
+      - PORT=6379
+    ports:
+      - "6379:6379"
+    networks:
+      - cache-net
+
+  node_b:
+    image: node:18-alpine
+    working_dir: /app/03-distributed_cache
+    volumes:
+      - ../:/app
+    command: npx ts-node src/server.ts
+    environment:
+      - PORT=6380
+    ports:
+      - "6380:6380"
+    networks:
+      - cache-net
+
+  node_c:
+    image: node:18-alpine
+    working_dir: /app/03-distributed_cache
+    volumes:
+      - ../:/app
+    command: npx ts-node src/server.ts
+    environment:
+      - PORT=6381
+    ports:
+      - "6381:6381"
+    networks:
+      - cache-net
+
+networks:
+  cache-net:
+    driver: bridge
