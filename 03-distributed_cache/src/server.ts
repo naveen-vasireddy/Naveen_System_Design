@@ -2,7 +2,7 @@ import net from 'net';
 import { LRUCache } from '../../shared/cache/lru';
 
 // Configuration
-const PORT = 6381;
+const PORT = process.env.PORT ? parseInt(process.env.PORT) : 6379;
 const CACHE_SIZE = 1000;
 const DEFAULT_TTL = 0; // 0 = Infinity (No expiry)
 
