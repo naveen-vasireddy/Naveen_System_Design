@@ -52,11 +52,30 @@ async function processOutbox() {
 
 // Start the worker loop
 async function start() {
-  await db.connect();
-  console.log('[Worker] Outbox processor started.');
-  
-  // Poll every 1 second
-  setInterval(processOutbox, 1000);
+  try {
+    await db.connect();
+    console.log('[Worker] Outbox processor started.');
+    
+    // Handle connection errors
+    db.on('error', (error) => {
+      console.error('[Worker] Database connection error:', error);
+      process.exit(1);
+    });
+    
+    // Poll every 1 second
+    const interval = setInterval(processOutbox, 1000);
+    
+    // Graceful shutdown
+    process.on('SIGTERM', () => {
+      console.log('[Worker] SIGTERM received, shutting down...');
+      clearInterval(interval);
+      db.end();
+      process.exit(0);
+    });
+  } catch (error) {
+    console.error('[Worker] Failed to start:', error);
+    process.exit(1);
+  }
 }
 
 start();
