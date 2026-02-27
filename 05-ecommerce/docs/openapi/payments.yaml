@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: Payments API
+  version: 1.0.0
+paths:
+  /payments/charge:
+    post:
+      summary: Charge a customer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId: { type: string }
+                amount: { type: number }
+                currency: { type: string }
+      responses:
+        '200':
+          description: Payment successful

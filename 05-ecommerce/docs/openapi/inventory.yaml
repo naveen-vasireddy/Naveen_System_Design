@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: Inventory API
+  version: 1.0.0
+paths:
+  /inventory/reserve:
+    post:
+      summary: Reserve stock for an order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId: { type: string }
+                items: { type: array }
+      responses:
+        '200':
+          description: Stock reserved successfully
+        '409':
+          description: Insufficient stock
