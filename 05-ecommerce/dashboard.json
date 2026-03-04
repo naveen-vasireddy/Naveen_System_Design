@@ -1,0 +1,51 @@
+{
+  "title": "E-Commerce Checkout Health",
+  "tags": ["ecommerce", "checkout", "slos"],
+  "timezone": "browser",
+  "panels": [
+    {
+      "title": "Payment Success Rate",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "payment_success_rate",
+          "legendFormat": "Success %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "green", "value": 99 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Checkout Latency (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, checkout_latency_ms)",
+          "legendFormat": "p95 Latency (ms)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 800 }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
