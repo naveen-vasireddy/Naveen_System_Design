@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # 1. Producer Service (POST /posts) - Built on Day 70
+  producer-api:
+    build: .
+    command: npx ts-node src/producer.ts
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - BROKER_URL=redis://message-broker:6379
+    depends_on:
+      - message-broker
+
+  # 2. Feed Endpoints (GET /feed) - Built on Day 72
+  feed-endpoints-api:
+    build: .
+    command: npx ts-node src/endpoints.ts
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - CACHE_URL=redis://redis-cache:6379
+    depends_on:
+      - redis-cache
+      - db-shard-0
+      - db-shard-1
+      - db-shard-2
+      - db-shard-3
+
+  # 3. Hybrid Fan-Out Worker - Built on Day 71
+  fanout-worker:
+    build: .
+    command: npx ts-node src/worker.ts
+    environment:
+      - BROKER_URL=redis://message-broker:6379
+    depends_on:
+      - message-broker
+      - db-shard-0
+      - db-shard-1
+      - db-shard-2
+      - db-shard-3
+
+  # 4. Message Broker (Simulating Kafka/Redis queue)
+  message-broker:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+
+  # 5. Redis Cache (Top N Feed Cache) - Built on Day 72
+  redis-cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # 6. Database Shards (userId modulo 4) - Built on Day 71
+  db-shard-0:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=feed_user
+      - POSTGRES_PASSWORD=feed_pass
+      - POSTGRES_DB=feed_shard_0
+    ports:
+      - "5432:5432"
+
+  db-shard-1:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=feed_user
+      - POSTGRES_PASSWORD=feed_pass
+      - POSTGRES_DB=feed_shard_1
+    ports:
+      - "5433:5432"
+
+  db-shard-2:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=feed_user
+      - POSTGRES_PASSWORD=feed_pass
+      - POSTGRES_DB=feed_shard_2
+    ports:
+      - "5434:5432"
+
+  db-shard-3:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=feed_user
+      - POSTGRES_PASSWORD=feed_pass
+      - POSTGRES_DB=feed_shard_3
+    ports:
+      - "5435:5432"
