@@ -1,3 +1,5 @@
+export {}
+
 // 1. The Logical Clock
 class LamportClock {
   public time: number = 0;
