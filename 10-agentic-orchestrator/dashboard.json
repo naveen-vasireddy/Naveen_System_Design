@@ -1,0 +1,73 @@
+{
+  "title": "Multi-Agent Orchestrator Health",
+  "description": "Real-time monitoring for agent workloads, task queues, and failure rates.",
+  "panels": [
+    {
+      "title": "Task Success Ratio",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "successful_tasks / total_tasks * 100",
+          "legendFormat": "Success Rate (%)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "orange", "value": 80 },
+              { "color": "green", "value": 95 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "title": "Active In-Flight Tasks (Backpressure Monitor)",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "active_in_flight_tasks",
+          "legendFormat": "Running Tasks"
+        }
+      ]
+    },
+    {
+      "title": "Average Task Latency (ms)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "average_task_latency_ms",
+          "legendFormat": "Latency (ms)"
+        }
+      ]
+    },
+    {
+      "title": "Dead Letter Queue (DLQ) Size",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "dlq_size",
+          "legendFormat": "Permanently Failed Tasks"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 30
+}
